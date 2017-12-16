@@ -82,8 +82,21 @@ export class AuthService {
     this.authIsLoading.next(true);
     const userData = {
       Username: username,
+      Pool: userPool
     };
+    const cognitoUser = new CognitoUser(userData);
+    cognitoUser.confirmRegistration(code, true, (err, result) => {
+      if(err){
+        console.log('confirm failed', err)
+      }else{
+        console.log('confirmation successful')
+        // redirect to the / route --> signIn page
+        this.router.navigate(['/']);
+      }
+    })
   }
+
+
   signIn(username: string, password: string): void {
     this.authIsLoading.next(true);
     const authData = {
@@ -93,11 +106,15 @@ export class AuthService {
     this.authStatusChanged.next(true);
     return;
   }
+
   getAuthenticatedUser() {
   }
+
   logout() {
     this.authStatusChanged.next(false);
   }
+
+
   isAuthenticated(): Observable<boolean> {
     const user = this.getAuthenticatedUser();
     const obs = Observable.create((observer) => {
