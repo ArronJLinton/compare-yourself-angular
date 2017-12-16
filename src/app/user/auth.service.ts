@@ -5,7 +5,7 @@ import { Subject } from 'rxjs/Subject';
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 // import cognitouserpool from amazon cognito identity js package
-import { CognitoUserPool, CognitoUserAttribute, CognitoUser } from 'amazon-cognito-identity-js'
+import { CognitoUserPool, CognitoUserAttribute, CognitoUser, AuthenticationDetails, CognitoUserSession } from 'amazon-cognito-identity-js'
 import { User } from './user.model';
 
 // user pool id and client id can both be found in the amazon cognito console inside your created user pool
@@ -15,7 +15,7 @@ const poolData = {
 };
 
 // create and configure a new user pool
-// userpool object that will be used along with the aws sdk
+// userpool object that will be used along with the aws sdk for all authentication funtionalities
 const userPool = new CognitoUserPool(poolData);
 
 
@@ -103,6 +103,31 @@ export class AuthService {
       Username: username,
       Password: password
     };
+
+    const authDetails = new AuthenticationDetails(authData);
+
+    const userData = {
+      Username: username,
+      Pool: userPool
+    };
+    const cognitoUser = new CognitoUser(userData);
+
+    // need to bind "this" to a constant which can be used inside the function below
+    const that = this;
+    cognitoUser.authenticateUser(authDetails, {
+      onSuccess (result: CognitoUserSession){
+        console.log(result)
+        console.log('access token', result.getAccessToken().getJwtToken());
+
+        // that.authStatusChange.next(true);
+        console.log('auth sucessful !')
+      },
+      onFailure(err){
+        console.log('failed auth', err)
+
+      }
+    });
+
     this.authStatusChanged.next(true);
     return;
   }
