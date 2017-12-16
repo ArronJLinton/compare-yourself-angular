@@ -25,11 +25,12 @@ export class SignupComponent implements OnInit {
       (didFail: boolean) => this.didFail = didFail
     );
   }
-
+// executed through form submit event listener
   onSubmit() {
     const usrName = this.form.value.username;
     const email = this.form.value.email;
     const password = this.form.value.password;
+    // call a method in the authService file
     this.authService.signUp(usrName, email, password);
   }
 
