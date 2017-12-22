@@ -144,6 +144,7 @@ export class AuthService {
   }
 
   getAuthenticatedUser() {
+    // grab currentUser by using the global userPool object
     return userPool.getCurrentUser();
     // cognitoUser.getUserAttributes(function(err, result) {
     //     if (err) {
@@ -157,16 +158,34 @@ export class AuthService {
   }
 
   logout() {
+    this.getAuthenticatedUser().signOut();
     this.authStatusChanged.next(false);
   }
 
   isAuthenticated(): Observable<boolean> {
+    // current user
     const user = this.getAuthenticatedUser();
+    // not sure what's going on here
     const obs = Observable.create(observer => {
       if (!user) {
         observer.next(false);
+    // this else block only checks to see if the user is valid in local storage
       } else {
-        observer.next(false);
+        // line of code will reach out to the back end to see if any of the authentication tokens are still valid
+        user.getSession((err, session) => {
+          if (err){
+            console.log(err)
+          }else{
+            // isValid() --> do we have a valid token
+            if(session.isValid()){
+            // inform the app that the user is authenticated
+            // takes care of things such as adjusting the menu bars if the user is authenticated
+              observer.next(true);
+            }else{
+              observer.next(false);
+            }
+          }
+        })
       }
       observer.complete();
     });
