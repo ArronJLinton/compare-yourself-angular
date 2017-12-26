@@ -23,6 +23,7 @@ export class CompareService {
     this.dataIsLoading.next(true);
     this.dataEdited.next(false);
     this.userData = data;
+    // access the authService and get the authenticated user --> functions used to retrieve tokens to be thrown inside the API headers
     this.authService.getAuthenticatedUser().getSession((err, session) => {
       if(err){
         // respond with a proper erro message
@@ -52,6 +53,7 @@ export class CompareService {
     this.dataLoadFailed.next(false);
     this.authService.getAuthenticatedUser().getSession((err, session) => {
       // .getJwtToken() ---> gets the actual string of the token 
+      // API url requires an an access as on of the path paramaters --> specified in API getway Method Request (URL Query String Parameters)
      const queryParam = "?accessToken=" + session.getAccessToken().getJwtToken();
      let urlParam = "all";
      if (!all) {
@@ -88,15 +90,16 @@ export class CompareService {
   
   onDeleteData() {
     this.dataLoadFailed.next(false);
-
     this.authService.getAuthenticatedUser().getSession((err, session) => {
-    this.http.delete("https://API_ID.execute-api.REGION.amazonaws.com/dev/", {
-        headers: new Headers({
-          Authorization: session.getIdToken().getJwtToken()
-        })
-      })
-      .subscribe(data => {
-          console.log(data);
+
+    // const queryParam = "?accessToken=" + session.getAccessToken().getJwtToken();
+
+    this.http.delete(
+        'https://rcjotd598a.execute-api.us-east-1.amazonaws.com/dev/compare-yourself/?accessToken=XXX', {
+          headers: new Headers({
+            'Authorization': session.getIdToken().getJwtToken()})
+        }).subscribe((data) => {
+          console.log('Deleted!', data);
         }, error => this.dataLoadFailed.next(true));
     })
   
